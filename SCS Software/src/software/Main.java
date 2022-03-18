@@ -17,8 +17,6 @@ public class Main {
 		
 		PurchasableItem sampleItem = GenerateItem(100, new BigDecimal(20), "ABC Soap");
 		
-		station.scanItem(sampleItem);
-		
 	}
 	
 	private static PurchasableItem GenerateItem(double weight, BigDecimal price, String desc) {
