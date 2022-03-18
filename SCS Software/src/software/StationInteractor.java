@@ -23,7 +23,7 @@ public class StationInteractor {
 	public void scanItem(PurchasableItem purchasableItem) {
 		scs.scanner.scan(purchasableItem.item);
 		scannedItems[numberOfScannedItems] = purchasableItem;
-		numberOfScannedItems++;		
+		numberOfScannedItems++;
 	}
 
 }
