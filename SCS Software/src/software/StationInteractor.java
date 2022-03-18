@@ -8,22 +8,22 @@ import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 public class StationInteractor {
 	private static final int MAX_OBJECTS = 50;
 	private SelfCheckoutStation scs;
-	private PurchasableItem[] scannedItems = new PurchasableItem[MAX_OBJECTS];
+	private PurchasableItem[] placedItems = new PurchasableItem[MAX_OBJECTS];
 	private BigDecimal totalBill = BigDecimal.valueOf(0);
-	private int numberOfScannedItems;
+	private int numberOfPlacedItems;
 	
 	public StationInteractor(int maxWeight, int sensitivity) {
 		int noteDenomination[] = {5, 10, 20, 50, 100};
 		BigDecimal coinDenomination[] = {new BigDecimal(0.05), new BigDecimal(0.10), new BigDecimal(0.25), new BigDecimal(1), new BigDecimal(2)};
 		
 		scs = new SelfCheckoutStation(Currency.getInstance("CAD"), noteDenomination, coinDenomination, maxWeight, sensitivity);
-		numberOfScannedItems = 0;
+		numberOfPlacedItems = 0;
 	}
 	
-	public void scanItem(PurchasableItem purchasableItem) {
-		scs.scanner.scan(purchasableItem.item);
-		scannedItems[numberOfScannedItems] = purchasableItem;
-		numberOfScannedItems++;		
+	public void placeItem(PurchasableItem purchasableItem) {
+		scs.scale.add(purchasableItem.item);
+		placedItems[numberOfPlacedItems] = purchasableItem;
+		numberOfPlacedItems++;
 	}
 
 }
