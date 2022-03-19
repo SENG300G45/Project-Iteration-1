@@ -39,5 +39,7 @@ public class Main {
 		Barcode barcode = new Barcode(code);
 		return item = new PurchasableItem(new BarcodedItem(barcode,weight), price, desc);
 	}
+	
+	
 
 }
