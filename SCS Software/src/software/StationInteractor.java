@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Currency;
 
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
+import org.lsmr.selfcheckout.devices.SimulationException;
 
 import observers.ScanCheckerObserver;
 
@@ -21,7 +22,12 @@ public class StationInteractor {
 		scs = new SelfCheckoutStation(Currency.getInstance("CAD"), noteDenomination, coinDenomination, maxWeight, sensitivity);
 		numberOfScannedItems = 0;
 	}
-	
+	/**
+	 * The user scans an item.
+	 * 
+	 * @param PurchasabeItem
+	 *            The item to scan.
+	 */
 	public void scanItem(PurchasableItem purchasableItem) {
 		ScanCheckerObserver observer = new ScanCheckerObserver();
 		scs.scanner.attach(observer);
