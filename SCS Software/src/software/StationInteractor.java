@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Currency;
 
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
+import org.lsmr.selfcheckout.devices.SimulationException;
 
 public class StationInteractor {
 	private static final int MAX_OBJECTS = 50;
@@ -20,6 +21,12 @@ public class StationInteractor {
 		numberOfPlacedItems = 0;
 	}
 	
+	/**
+	 * The user places the item on the electronic scale.
+	 * 
+	 * @param PurchasableItem
+	 *            The item to scan.
+	 */
 	public void placeItem(PurchasableItem purchasableItem) {
 		scs.scale.add(purchasableItem.item);
 		placedItems[numberOfPlacedItems] = purchasableItem;

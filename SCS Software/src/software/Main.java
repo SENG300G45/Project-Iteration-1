@@ -1,21 +1,20 @@
 package software;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 import java.util.Random;
 
 import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
 import org.lsmr.selfcheckout.Numeral;
-import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 
 public class Main {
 	private static final int MAX_OBJECTS = 50;
 	
 	public static void main(String args[]) {
 		StationInteractor station = new StationInteractor(10000, 1);
-		
 		PurchasableItem sampleItem = GenerateItem(100, new BigDecimal(20), "ABC Soap");
+		
+		station.placeItem(sampleItem);
 		
 	}
 	
