@@ -41,6 +41,7 @@ public class CoinChecker implements CoinValidatorObserver{
 	
 	public boolean checkValid() {
 		return isValid;
+		
 	}
 
 }
