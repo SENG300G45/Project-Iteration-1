@@ -9,6 +9,9 @@ import org.lsmr.selfcheckout.devices.DisabledException;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.observers.CoinValidatorObserver;
 
+import observers.BanknoteCheckerObserver;
+import observers.CoinCheckerObserver;
+
 
 public class StationInteractor {
 	private static final int MAX_OBJECTS = 50;
@@ -54,7 +57,7 @@ public class StationInteractor {
 	
 	private void addCoin(Coin coin) throws DisabledException {
 		
-		CoinChecker checker = new CoinChecker();
+		CoinCheckerObserver checker = new CoinCheckerObserver();
 		scs.coinValidator.attach(checker);
 		scs.coinValidator.accept(coin);
 		if(checker.checkValid()) {
@@ -65,7 +68,7 @@ public class StationInteractor {
 	}
 	
 	private void addBanknote(Banknote note) throws DisabledException {
-		BanknoteChecker checker = new BanknoteChecker();
+		BanknoteCheckerObserver checker = new BanknoteCheckerObserver();
 		scs.banknoteValidator.attach(checker);
 		scs.banknoteValidator.accept(note);
 		if(checker.checkValid()) {

@@ -1,41 +1,48 @@
-package software;
+package observers;
 
 import java.math.BigDecimal;
+import java.util.Currency;
 
 import org.lsmr.selfcheckout.devices.AbstractDevice;
-import org.lsmr.selfcheckout.devices.CoinValidator;
+import org.lsmr.selfcheckout.devices.BanknoteValidator;
 import org.lsmr.selfcheckout.devices.observers.AbstractDeviceObserver;
-import org.lsmr.selfcheckout.devices.observers.CoinValidatorObserver;
+import org.lsmr.selfcheckout.devices.observers.BanknoteValidatorObserver;
 
-public class CoinChecker implements CoinValidatorObserver{
-	private BigDecimal value;
+public class BanknoteCheckerObserver implements BanknoteValidatorObserver {
+	private int value;
 	private boolean isValid;
-
+	
 	@Override
 	public void enabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
 		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public void disabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
 		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
-	public void validCoinDetected(CoinValidator validator, BigDecimal value) {
-		this.value = value;
+	public void validBanknoteDetected(BanknoteValidator validator, Currency currency, int value) {
+		this.value = value; 
 		this.isValid = true;
+		
 	}
 
 	@Override
-	public void invalidCoinDetected(CoinValidator validator) {
+	public void invalidBanknoteDetected(BanknoteValidator validator) {
 		this.isValid = false;
+		//it will switch
+		
 		
 	}
 	
-	public BigDecimal getValue() {
+	public int getValue() {
 		return value;
 	}
+	
 	
 	public boolean checkValid() {
 		return isValid;
