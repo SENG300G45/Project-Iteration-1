@@ -5,6 +5,8 @@ import java.util.Currency;
 
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 
+import observers.ScanCheckerObserver;
+
 public class StationInteractor {
 	private static final int MAX_OBJECTS = 50;
 	private SelfCheckoutStation scs;
@@ -21,7 +23,12 @@ public class StationInteractor {
 	}
 	
 	public void scanItem(PurchasableItem purchasableItem) {
-		scs.scanner.scan(purchasableItem.item);
+		ScanCheckerObserver observer = new ScanCheckerObserver();
+		scs.scanner.attach(observer);
+		while(observer.getBarcode() == null) {
+			scs.scanner.scan(purchasableItem.item);
+		}
+		
 		scannedItems[numberOfScannedItems] = purchasableItem;
 		numberOfScannedItems++;
 	}

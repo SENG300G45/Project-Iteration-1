@@ -18,6 +18,7 @@ public class Main {
 		PurchasableItem sampleItem = GenerateItem(100, new BigDecimal(20), "ABC Soap");
 		
 		station.scanItem(sampleItem);
+		System.out.println(sampleItem.item.getBarcode().toString());
 		
 	}
 	
@@ -30,7 +31,6 @@ public class Main {
 		 */
 		final int MAX_CODES = 12;
 		
-		PurchasableItem item;
 		Numeral code[] = new Numeral[MAX_CODES];
 		Random rand = new Random();
 		
@@ -39,7 +39,7 @@ public class Main {
 		}
 		
 		Barcode barcode = new Barcode(code);
-		return item = new PurchasableItem(new BarcodedItem(barcode,weight), price, desc);
+		return new PurchasableItem(new BarcodedItem(barcode,weight), price, desc);
 	}
 
 }
