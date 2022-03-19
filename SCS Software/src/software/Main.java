@@ -1,13 +1,11 @@
 package software;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 import java.util.Random;
 
 import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
 import org.lsmr.selfcheckout.Numeral;
-import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 
 public class Main {
 	private static final int MAX_OBJECTS = 50;
