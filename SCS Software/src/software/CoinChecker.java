@@ -14,13 +14,11 @@ public class CoinChecker implements CoinValidatorObserver{
 	@Override
 	public void enabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void disabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
