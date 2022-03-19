@@ -3,16 +3,19 @@ package software;
 import java.math.BigDecimal;
 import java.util.Currency;
 
+import org.lsmr.selfcheckout.Banknote;
 import org.lsmr.selfcheckout.Coin;
 import org.lsmr.selfcheckout.devices.DisabledException;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.observers.CoinValidatorObserver;
+
 
 public class StationInteractor {
 	private static final int MAX_OBJECTS = 50;
 	private SelfCheckoutStation scs;
 	private BigDecimal totalBill = BigDecimal.valueOf(0);
 	private BigDecimal paidAmountWithCoins = BigDecimal.ZERO;
+	private int paidAmountWithBanknote = 0;
 	
 	public StationInteractor(int maxWeight, int sensitivity) {
 		int noteDenomination[] = {5, 10, 20, 50, 100};
@@ -35,7 +38,16 @@ public class StationInteractor {
 			}
 		}
 		else {
-			// Pay with banknotes
+			
+			while((float) paidAmountWithBanknote < totalBill.floatValue()) {
+				Banknote fiveDollarBill = new Banknote(Currency.getInstance("CAD"), scs.banknoteDenominations[0]);
+				try {
+					addBanknote(fiveDollarBill);
+				} catch (DisabledException e) {
+					e.printStackTrace();
+				}
+			}
+			
 		}
 		
 	}
@@ -49,6 +61,16 @@ public class StationInteractor {
 			paidAmountWithCoins.add(checker.getValue());
 		}
 		
+		
+	}
+	
+	private void addBanknote(Banknote note) throws DisabledException {
+		BanknoteChecker checker = new BanknoteChecker();
+		scs.banknoteValidator.attach(checker);
+		scs.banknoteValidator.accept(note);
+		if(checker.checkValid()) {
+			paidAmountWithBanknote += checker.getValue();
+		}
 		
 	}
 	
