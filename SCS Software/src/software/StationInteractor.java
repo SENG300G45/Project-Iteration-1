@@ -3,82 +3,100 @@ package software;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Currency;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import org.lsmr.selfcheckout.*;
+import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
+import org.lsmr.selfcheckout.Item;
 import org.lsmr.selfcheckout.Numeral;
 import org.lsmr.selfcheckout.devices.AbstractDevice;
-import org.lsmr.selfcheckout.devices.BarcodeScanner;
+import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
-import org.lsmr.selfcheckout.devices.SimulationException;
 import org.lsmr.selfcheckout.devices.observers.AbstractDeviceObserver;
-import org.lsmr.selfcheckout.devices.observers.BarcodeScannerObserver;
+import org.lsmr.selfcheckout.devices.observers.ElectronicScaleObserver;
 
-import org.lsmr.selfcheckout.products.*;
 
-import observers.ScanCheckerObserver;
 
-public class StationInteractor implements BarcodeScannerObserver {
+public class StationInteractor implements ElectronicScaleObserver {
+	//private ArrayList<Item> items = new ArrayList<>();
 	private static final int MAX_OBJECTS = 50;
 	private SelfCheckoutStation selfCheckoutStation;
-	private PurchasableItem[] scannedItems = new PurchasableItem[MAX_OBJECTS];
+	private PurchasableItem[] placedItems = new PurchasableItem[MAX_OBJECTS];
+	public PurchasableItem[] itemCatalog = new PurchasableItem[10]; 
 	private BigDecimal totalBill = BigDecimal.valueOf(0);
-	private int numberOfScannedItems;
-	public Barcode itemBarcode;
-	public double itemWeight;
-	//public List<PurchasableItem> itemCatalog = new ArrayList<PurchasableItem>();
-	public Map<Barcode, BarcodedItem> map = new HashMap<Barcode, BarcodedItem>();
-	public BarcodedItem matchingBarcodedItem = null;
+	private int numberOfPlacedItems;
+	public double currentWeightOnScale;
+	public boolean isOverloaded = false;
+	public boolean itemWeightCorrect;
 
-	
-	
 	public StationInteractor(SelfCheckoutStation scs) {
 		selfCheckoutStation = scs;
-		scs.scanner.attach(this);
-		
-		//List of Purchasableitems in catalog
-		Numeral numeral[] = {Numeral.one, Numeral.two};
-		Barcode b = new Barcode(numeral);
-		BarcodedItem redAppleBarcodedItem = new BarcodedItem(b, 10.0);
-		BigDecimal redApplePrice = new BigDecimal("1.50");
-		//PurchasableItem redApple = new PurchasableItem(redAppleBarcodedItem, redApplePrice, "red apple");
-		
-		//itemCatalog.add(redApple);
-		map.put(b, redAppleBarcodedItem);
-	}
-	
-	
+		scs.scale.attach(this);
 
-	public void scanItem(PurchasableItem purchasableItem) {
-		selfCheckoutStation.scanner.scan(purchasableItem.item);
-		matchingBarcodedItem = map.get(itemBarcode);
-		
-		if (matchingBarcodedItem != null) {
-			itemWeight = matchingBarcodedItem.getWeight();
-			scannedItems[numberOfScannedItems] = purchasableItem;
-			numberOfScannedItems++;
-		}
 		
 		
-			
-
 	}
 	
 	@Override
 	public void enabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
-		
 	}
+
 	@Override
 	public void disabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
-		
 	}
+
 	@Override
-	public void barcodeScanned(BarcodeScanner barcodeScanner, Barcode barcode) {
-		itemBarcode = barcode;
+	public void weightChanged(ElectronicScale scale, double weightInGrams) {
+		isOverloaded = false;
+		currentWeightOnScale = weightInGrams;
+	}
+
+	@Override
+	public void overload(ElectronicScale scale) {
+		isOverloaded = true;
 		
 	}
+
+	@Override
+	public void outOfOverload(ElectronicScale scale) {
+		isOverloaded = false;
+	}
+	
+	public void placeInBaggingArea(PurchasableItem purchasableItem) {
+		selfCheckoutStation.scale.add(purchasableItem.item);
+		
+		//Case where scale is overloaded		
+		if (isOverloaded == true) {
+			//error
+			System.out.print("urmumgae");
+			itemWeightCorrect = false;
+		}
+		
+		else {
+			//Case where placed item does match item's listed weight
+			if (currentWeightOnScale == purchasableItem.getWeight()) {
+				System.out.print("walrus");
+				itemWeightCorrect = true;
+				placedItems[numberOfPlacedItems] = purchasableItem;
+				numberOfPlacedItems++;
+				totalBill = totalBill.add(purchasableItem.getPrice());
+			}
+			
+			//Case where placed item does not match item's listed weight
+			if (currentWeightOnScale != purchasableItem.getWeight()) {
+				itemWeightCorrect = false;
+			}
+		
+
+		}
+			
+	}
+	
+		
+		
+	
+
+
+	
+
 
 }

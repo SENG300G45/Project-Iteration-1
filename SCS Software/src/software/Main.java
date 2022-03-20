@@ -12,11 +12,9 @@ public class Main {
 	
 	public static void main(String args[]) {
 		StationInteractor station = new StationInteractor(10000, 1);
-		
 		PurchasableItem sampleItem = GenerateItem(100, new BigDecimal(20), "ABC Soap");
 		
-		station.scanItem(sampleItem);
-		System.out.println(sampleItem.item.getBarcode().toString());
+		station.placeItem(sampleItem);
 		
 	}
 	
@@ -29,6 +27,7 @@ public class Main {
 		 */
 		final int MAX_CODES = 12;
 		
+		PurchasableItem item;
 		Numeral code[] = new Numeral[MAX_CODES];
 		Random rand = new Random();
 		
@@ -37,7 +36,7 @@ public class Main {
 		}
 		
 		Barcode barcode = new Barcode(code);
-		return new PurchasableItem(new BarcodedItem(barcode,weight), price, desc);
+		return item = new PurchasableItem(new BarcodedItem(barcode,weight), price, desc);
 	}
 
 }
