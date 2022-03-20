@@ -3,6 +3,9 @@ package software;
 import java.math.BigDecimal;
 import java.util.Currency;
 
+import org.lsmr.selfcheckout.Banknote;
+import org.lsmr.selfcheckout.Coin;
+import org.lsmr.selfcheckout.devices.DisabledException;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
 
@@ -10,6 +13,10 @@ import observers.ScanCheckerObserver;
 
 import observers.ScaleCheckObserver;
 import observers.StationInteractorObserver;
+import org.lsmr.selfcheckout.devices.observers.CoinValidatorObserver;
+
+import observers.BanknoteCheckerObserver;
+import observers.CoinCheckerObserver;
 
 public class StationInteractor {
 	private static final int MAX_OBJECTS = 50;
@@ -59,20 +66,69 @@ public class StationInteractor {
 	 * The user scans an item.
 	 * 
 	 * @param PurchasabeItem
-	 *            The item to scan.
+	 *                       The item to scan.
 	 */
 	public void scanItem(PurchasableItem purchasableItem) {
 		ScanCheckerObserver observer = new ScanCheckerObserver();
 		scs.scanner.attach(observer);
-		while(observer.getBarcode() == null) {
+		while (observer.getBarcode() == null) {
 			scs.scanner.scan(purchasableItem.item);
 		}
-		
+
 		scannedItems[numberOfScannedItems] = purchasableItem;
 		numberOfScannedItems++;
+	}
 
 	private void notifyScaleFull() {
 		stationObserver.scaleOverloaded(this);
+	}
+
+	public void checkout(boolean isPayingWithCoins) {
+		if (isPayingWithCoins) {
+
+			while (paidAmountWithCoins.compareTo(totalBill) < 0) {
+				Coin dollar = new Coin(scs.coinDenominations.get(3));
+
+				try {
+					addCoin(dollar);
+				} catch (DisabledException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+
+			while ((float) paidAmountWithBanknote < totalBill.floatValue()) {
+				Banknote fiveDollarBill = new Banknote(Currency.getInstance("CAD"), scs.banknoteDenominations[0]);
+				try {
+					addBanknote(fiveDollarBill);
+				} catch (DisabledException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+
+	}
+
+	private void addCoin(Coin coin) throws DisabledException {
+
+		CoinCheckerObserver checker = new CoinCheckerObserver();
+		scs.coinValidator.attach(checker);
+		scs.coinValidator.accept(coin);
+		if (checker.checkValid()) {
+			paidAmountWithCoins.add(checker.getValue());
+		}
+
+	}
+
+	private void addBanknote(Banknote note) throws DisabledException {
+		BanknoteCheckerObserver checker = new BanknoteCheckerObserver();
+		scs.banknoteValidator.attach(checker);
+		scs.banknoteValidator.accept(note);
+		if (checker.checkValid()) {
+			paidAmountWithBanknote += checker.getValue();
+		}
+
 	}
 
 }
