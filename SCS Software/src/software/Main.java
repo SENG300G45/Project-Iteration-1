@@ -1,11 +1,13 @@
 package software;
 
 import java.math.BigDecimal;
+import java.util.Currency;
 import java.util.Random;
 
 import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
 import org.lsmr.selfcheckout.Numeral;
+import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 
 public class Main {
 	private static final int MAX_OBJECTS = 50;
@@ -16,7 +18,6 @@ public class Main {
 		PurchasableItem sampleItem = GenerateItem(100, new BigDecimal(20), "ABC Soap");
 		
 		station.scanItem(sampleItem);
-		System.out.println(sampleItem.item.getBarcode().toString());
 		
 	}
 	
@@ -29,6 +30,7 @@ public class Main {
 		 */
 		final int MAX_CODES = 12;
 		
+		PurchasableItem item;
 		Numeral code[] = new Numeral[MAX_CODES];
 		Random rand = new Random();
 		
@@ -37,7 +39,7 @@ public class Main {
 		}
 		
 		Barcode barcode = new Barcode(code);
-		return new PurchasableItem(new BarcodedItem(barcode,weight), price, desc);
+		return item = new PurchasableItem(new BarcodedItem(barcode,weight), price, desc);
 	}
 
 }
