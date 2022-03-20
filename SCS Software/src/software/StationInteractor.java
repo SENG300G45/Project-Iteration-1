@@ -39,20 +39,16 @@ public class StationInteractor implements BarcodeScannerObserver {
 		selfCheckoutStation = scs;
 		scs.scanner.attach(this);
 		
-		//List of Purchasableitems in catalog
-		Numeral numeral[] = {Numeral.one, Numeral.two};
-		Barcode b = new Barcode(numeral);
-		BarcodedItem redAppleBarcodedItem = new BarcodedItem(b, 10.0);
-		BigDecimal redApplePrice = new BigDecimal("1.50");
-		//PurchasableItem redApple = new PurchasableItem(redAppleBarcodedItem, redApplePrice, "red apple");
 		
-		//itemCatalog.add(redApple);
-		map.put(b, redAppleBarcodedItem);
+	}
+	
+	public void addItemToCatalog(PurchasableItem purchasableItem) {
+				map.put(purchasableItem.getCode(), purchasableItem.item);
 	}
 	
 	
 
-	public void scanItem(PurchasableItem purchasableItem) {
+	public void scanItem(PurchasableItem purchasableItem) throws SimulationException{
 		selfCheckoutStation.scanner.scan(purchasableItem.item);
 		matchingBarcodedItem = map.get(itemBarcode);
 		
@@ -61,10 +57,10 @@ public class StationInteractor implements BarcodeScannerObserver {
 			scannedItems[numberOfScannedItems] = purchasableItem;
 			numberOfScannedItems++;
 		}
+		else {
+			throw new SimulationException("Item not found in the catalog");
+		}
 		
-		
-			
-
 	}
 	
 	@Override
