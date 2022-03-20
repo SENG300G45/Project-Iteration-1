@@ -20,9 +20,6 @@ import org.lsmr.selfcheckout.devices.observers.AbstractDeviceObserver;
 import org.lsmr.selfcheckout.devices.observers.BanknoteValidatorObserver;
 import org.lsmr.selfcheckout.devices.observers.CoinValidatorObserver;
 
-import observers.BanknoteCheckerObserver;
-import observers.CoinCheckerObserver;
-
 
 public class StationInteractor implements CoinValidatorObserver, BanknoteValidatorObserver {
 	private static final int MAX_OBJECTS = 50;
