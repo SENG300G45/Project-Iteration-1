@@ -22,8 +22,10 @@ public class StationInteractor {
 	private static final int MAX_OBJECTS = 50;
 	private SelfCheckoutStation scs;
 	private PurchasableItem[] placedItems = new PurchasableItem[MAX_OBJECTS];
+	private PurchasableItem[] scannedItems = new PurchasableItem[MAX_OBJECTS];
 	private BigDecimal totalBill = BigDecimal.valueOf(0);
 	private int numberOfPlacedItems;
+	private int numberOfScannedItems;
 
 	private StationInteractorObserver stationObserver;
 
@@ -82,7 +84,15 @@ public class StationInteractor {
 	private void notifyScaleFull() {
 		stationObserver.scaleOverloaded(this);
 	}
+	
 
+	/**
+	 * The user wishes to checkout
+	 * 
+	 * @param isPayingWithCoins
+	 *                        True if the user wants to pay with coins, and False
+	 *                        when the user wants to pay with banknotes.
+	 */
 	public void checkout(boolean isPayingWithCoins) {
 		if (isPayingWithCoins) {
 
