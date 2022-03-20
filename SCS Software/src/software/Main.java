@@ -9,35 +9,35 @@ import org.lsmr.selfcheckout.Numeral;
 
 public class Main {
 	private static final int MAX_OBJECTS = 50;
-	
+
 	public static void main(String args[]) {
 		StationInteractor station = new StationInteractor(10000, 1);
-		
 		PurchasableItem sampleItem = GenerateItem(100, new BigDecimal(20), "ABC Soap");
-		
+
 		station.scanItem(sampleItem);
 		System.out.println(sampleItem.item.getBarcode().toString());
-		
+		station.placeItem(sampleItem);
+
 	}
-	
+
 	private static PurchasableItem GenerateItem(double weight, BigDecimal price, String desc) {
 		/**
 		 * Generates an item with a random barcode.
-		 *  
+		 * 
 		 * @param weight
-		 *            Assign a weight to the random item
+		 *               Assign a weight to the random item
 		 */
 		final int MAX_CODES = 12;
-		
+
 		Numeral code[] = new Numeral[MAX_CODES];
 		Random rand = new Random();
-		
-		for(int i=0; i < MAX_CODES; i++) {
+
+		for (int i = 0; i < MAX_CODES; i++) {
 			code[i] = Numeral.valueOf((byte) rand.nextInt(10));
 		}
-		
+
 		Barcode barcode = new Barcode(code);
-		return new PurchasableItem(new BarcodedItem(barcode,weight), price, desc);
+		return new PurchasableItem(new BarcodedItem(barcode, weight), price, desc);
 	}
 
 }
