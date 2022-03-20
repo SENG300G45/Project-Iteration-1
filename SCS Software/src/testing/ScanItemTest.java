@@ -1,8 +1,10 @@
 package testing;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.math.BigDecimal;
+import java.util.Currency;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,10 +20,16 @@ import software.StationInteractor;
 public class ScanItemTest {
 	private SelfCheckoutStation scs;
 	private StationInteractor si;
+	PurchasableItem testApple; 
 	PurchasableItem testApple2; 
 
 	@Before
 	public void setup() {
+		int maxWeight = 100;
+		int sensitivity = 5;
+		int noteDenomination[] = {5, 10, 20, 50, 100};
+		BigDecimal coinDenomination[] = {new BigDecimal(0.05), new BigDecimal(0.10), new BigDecimal(0.25), new BigDecimal(1), new BigDecimal(2)};
+		scs = new SelfCheckoutStation(Currency.getInstance("CAD"), noteDenomination, coinDenomination, maxWeight, sensitivity);
 		si = new StationInteractor(scs);
 		
 		Numeral numeral[] = {Numeral.one, Numeral.two};
@@ -31,8 +39,8 @@ public class ScanItemTest {
 		testApple = new PurchasableItem(testAppleBarcodedItem,testApplePrice, "red apple");
 		
 		Numeral numeral2[] = {Numeral.three, Numeral.two};
-		Barcode b2 = new Barcode(numeral);
-		BarcodedItem testAppleBarcodedItem2 = new BarcodedItem(b, 10.0);
+		Barcode b2 = new Barcode(numeral2);
+		BarcodedItem testAppleBarcodedItem2 = new BarcodedItem(b2, 10.0);
 		BigDecimal testApplePrice2 = new BigDecimal("1.50");
 		testApple2 = new PurchasableItem(testAppleBarcodedItem2,testApplePrice2, "red apple");
 	
@@ -40,13 +48,14 @@ public class ScanItemTest {
 	@Test
 	public void testItemCodeNull() {
 		si.scanItem(testApple2);
-		assertEquals(null, si.matchingBarcodedItem);
+		System.out.print(testApple.getCode());
+		assertNull(si.matchingBarcodedItem);
 	}
 	
 	@Test
 	public void testItemNotNull() {
 		si.scanItem(testApple);
-		assertEquals(, si.matchingBarcodedItem);
+		assertEquals(testApple.getWeight(), si.itemWeight, 0);
 	}
 
 
@@ -66,4 +75,3 @@ public class ScanItemTest {
 
 
 
-}

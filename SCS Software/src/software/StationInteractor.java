@@ -31,7 +31,7 @@ public class StationInteractor implements BarcodeScannerObserver {
 	public double itemWeight;
 	//public List<PurchasableItem> itemCatalog = new ArrayList<PurchasableItem>();
 	public Map<Barcode, BarcodedItem> map = new HashMap<Barcode, BarcodedItem>();
-	public BarcodedItem matchingBarcodedItem;
+	public BarcodedItem matchingBarcodedItem = null;
 
 	
 	
@@ -54,7 +54,7 @@ public class StationInteractor implements BarcodeScannerObserver {
 
 	public void scanItem(PurchasableItem purchasableItem) {
 		selfCheckoutStation.scanner.scan(purchasableItem.item);
-		matchingBarcodedItem = map.get(itemBarcode); 
+		matchingBarcodedItem = map.get(itemBarcode);
 		
 		if (matchingBarcodedItem != null) {
 			itemWeight = matchingBarcodedItem.getWeight();
