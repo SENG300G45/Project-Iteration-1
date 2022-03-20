@@ -23,9 +23,11 @@ public class StationInteractor {
 	private SelfCheckoutStation scs;
 	private PurchasableItem[] placedItems = new PurchasableItem[MAX_OBJECTS];
 	private PurchasableItem[] scannedItems = new PurchasableItem[MAX_OBJECTS];
-	private BigDecimal totalBill = BigDecimal.valueOf(0);
 	private int numberOfPlacedItems;
 	private int numberOfScannedItems;
+	private BigDecimal totalBill = BigDecimal.valueOf(0);
+	private BigDecimal paidAmountWithCoins = BigDecimal.ZERO;
+	private int paidAmountWithBanknote = 0;
 
 	private StationInteractorObserver stationObserver;
 
