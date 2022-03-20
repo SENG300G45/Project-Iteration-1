@@ -1,58 +1,88 @@
 package software;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Currency;
 
+import org.lsmr.selfcheckout.Item;
+import org.lsmr.selfcheckout.devices.AbstractDevice;
+import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
+import org.lsmr.selfcheckout.devices.observers.AbstractDeviceObserver;
+import org.lsmr.selfcheckout.devices.observers.ElectronicScaleObserver;
 
-import observers.ScaleCheckObserver;
-import observers.StationInteractorObserver;
 
-public class StationInteractor {
+
+public class StationInteractor implements ElectronicScaleObserver {
+	//private ArrayList<Item> items = new ArrayList<>();
 	private static final int MAX_OBJECTS = 50;
-	private SelfCheckoutStation scs;
+	private SelfCheckoutStation selfCheckoutStation;
 	private PurchasableItem[] placedItems = new PurchasableItem[MAX_OBJECTS];
 	private BigDecimal totalBill = BigDecimal.valueOf(0);
 	private int numberOfPlacedItems;
+	private double currentWeightOnScale;
+	private boolean isOverloaded;
 	
-	private StationInteractorObserver stationObserver;
+	//private StationInteractorObserver stationObserver;
 	
-	public StationInteractor(int maxWeight, int sensitivity) {
-		int noteDenomination[] = {5, 10, 20, 50, 100};
-		BigDecimal coinDenomination[] = {new BigDecimal(0.05), new BigDecimal(0.10), new BigDecimal(0.25), new BigDecimal(1), new BigDecimal(2)};
+	public StationInteractor(SelfCheckoutStation scs) {
+		selfCheckoutStation = scs;
+		scs.scale.attach(this);
 		
-		scs = new SelfCheckoutStation(Currency.getInstance("CAD"), noteDenomination, coinDenomination, maxWeight, sensitivity);
-		stationObserver = new StationInteractorObserver();
-		numberOfPlacedItems = 0;
+		
 	}
 	
-	/**
-	 * The user places the item on the electronic scale.
-	 * 
-	 * @param PurchasableItem
-	 *            The item to scan.
-	 */
-	public void placeItem(PurchasableItem purchasableItem) {
-		ScaleCheckObserver observer = new ScaleCheckObserver();
-		scs.scale.attach(observer);
+	@Override
+	public void enabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
+	}
+
+	@Override
+	public void disabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
+	}
+
+	@Override
+	public void weightChanged(ElectronicScale scale, double weightInGrams) {
+		currentWeightOnScale += weightInGrams;
+	}
+
+	@Override
+	public void overload(ElectronicScale scale) {
+		isOverloaded = true;
 		
-		// TODO Add a loop that checks if the item has been scanned
-		if(!observer.checkFull()) {
-			scs.scale.add(purchasableItem.item);
+	}
+
+	@Override
+	public void outOfOverload(ElectronicScale scale) {
+		isOverloaded = false;
+	}
+	
+	public void placeInBaggingArea(PurchasableItem purchasableItem) {
+		
+		//Case where scale is overloaded
+		if (isOverloaded == true) {
+			//error
+		}
+		
+		//Case where placed item does not match item's suppose weight
+		if (isOverloaded == false && currentWeightOnScale != purchasableItem.getWeight()) {
+			//error
+		}
+		
+		if (isOverloaded == false && currentWeightOnScale == purchasableItem.getWeight()) {
 			placedItems[numberOfPlacedItems] = purchasableItem;
 			numberOfPlacedItems++;
-			
-			// Adds the price of the item to the total bill
 			totalBill = totalBill.add(purchasableItem.getPrice());
 		}
-		else {
-			notifyScaleFull();
-		}
+			
 		
 	}
 	
-	private void notifyScaleFull() {
-		stationObserver.scaleOverloaded(this);
-	}
+		
+		
+	
+
+
+	
+
 
 }
