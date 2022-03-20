@@ -85,6 +85,8 @@ public class StationInteractor implements CoinValidatorObserver, BanknoteValidat
 //		if(checker.checkValid()) {
 //			paidAmountWithCoins.add(checker.getValue());
 //		}
+		
+		selfCheckoutStation.coinValidator.accept(coin);
 		paidAmountWithCoins = paidAmountWithCoins.add(coinValue);
 		
 	}
@@ -96,6 +98,7 @@ public class StationInteractor implements CoinValidatorObserver, BanknoteValidat
 //		if(checker.checkValid()) {
 //			paidAmountWithBanknote += checker.getValue();
 //		}
+		selfCheckoutStation.banknoteValidator.accept(note);
 		paidAmountWithBanknote += banknoteValue;
 	}
 
