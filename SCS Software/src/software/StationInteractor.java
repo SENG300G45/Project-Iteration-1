@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.lsmr.selfcheckout.*;
-import org.lsmr.selfcheckout.BarcodedItem;
-import org.lsmr.selfcheckout.Numeral;
 import org.lsmr.selfcheckout.devices.AbstractDevice;
 import org.lsmr.selfcheckout.devices.BarcodeScanner;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
+import org.lsmr.selfcheckout.devices.observers.AbstractDeviceObserver;
+import org.lsmr.selfcheckout.devices.observers.BarcodeScannerObserver;
 
 import observers.ScanCheckerObserver;
 
@@ -29,28 +29,28 @@ public class StationInteractor implements BarcodeScannerObserver {
 	private int numberOfScannedItems;
 	public Barcode itemBarcode;
 	public double itemWeight;
-	//public List<PurchasableItem> itemCatalog = new ArrayList<PurchasableItem>();
 	public Map<Barcode, BarcodedItem> map = new HashMap<Barcode, BarcodedItem>();
-	public BarcodedItem matchingBarcodedItem = null;
 
 	
 	
 	public StationInteractor(SelfCheckoutStation scs) {
 		selfCheckoutStation = scs;
-		scs.scanner.attach(this);
-		
-		
+		scs.scanner.attach(this);		
 	}
 	
 	public void addItemToCatalog(PurchasableItem purchasableItem) {
 				map.put(purchasableItem.getCode(), purchasableItem.item);
 	}
 	
-	
-
-	public void scanItem(PurchasableItem purchasableItem) throws SimulationException{
+	/**
+	 * The user scans an item.
+	 * 
+	 * @param PurchasabeItem
+	 *            The item to scan.
+	 */
+	public void scanItem(PurchasableItem purchasableItem) {
 		selfCheckoutStation.scanner.scan(purchasableItem.item);
-		matchingBarcodedItem = map.get(itemBarcode);
+		BarcodedItem matchingBarcodedItem = map.get(itemBarcode);
 		
 		if (matchingBarcodedItem != null) {
 			itemWeight = matchingBarcodedItem.getWeight();
@@ -60,23 +60,24 @@ public class StationInteractor implements BarcodeScannerObserver {
 		else {
 			throw new SimulationException("Item not found in the catalog");
 		}
+	}
+
+	@Override
+	public void enabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
+		// TODO Auto-generated method stub
 		
 	}
-	/**
-	 * The user scans an item.
-	 * 
-	 * @param PurchasabeItem
-	 *            The item to scan.
-	 */
-	public void scanItem(PurchasableItem purchasableItem) {
-		ScanCheckerObserver observer = new ScanCheckerObserver();
-		scs.scanner.attach(observer);
-		while(observer.getBarcode() == null) {
-			scs.scanner.scan(purchasableItem.item);
-		}
+
+	@Override
+	public void disabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
+		// TODO Auto-generated method stub
 		
-		scannedItems[numberOfScannedItems] = purchasableItem;
-		numberOfScannedItems++;
+	}
+
+	@Override
+	public void barcodeScanned(BarcodeScanner barcodeScanner, Barcode barcode) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

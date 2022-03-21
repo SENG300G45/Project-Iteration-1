@@ -43,13 +43,19 @@ public class ScanItemTest {
 		BarcodedItem testAppleBarcodedItem2 = new BarcodedItem(b2, 10.0);
 		BigDecimal testApplePrice2 = new BigDecimal("1.50");
 		testApple2 = new PurchasableItem(testAppleBarcodedItem2,testApplePrice2, "red apple");
+		
+		si.addItemToCatalog(testApple);
 	
 	}
 	@Test
 	public void testItemCodeNull() {
-		si.scanItem(testApple2);
-		System.out.print(testApple.getCode());
-		assertNull(si.matchingBarcodedItem);
+		try {
+			si.scanItem(testApple2);
+		}
+		catch(SimulationException e) {
+			
+		}
+		
 	}
 	
 	@Test
