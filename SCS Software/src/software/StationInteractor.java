@@ -48,6 +48,13 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 	public boolean attendantCalled;
 
 	public StationInteractor(SelfCheckoutStation scs) {
+		/**
+		 * Constructs a Station interactor.
+		 * 
+		 * @param SelfCheckoutStation
+		 *               Assign a self checkout station with the interactor
+		 * @throws DisabledException
+		 */
 		selfCheckoutStation = scs;
 		selfCheckoutStation.scale.attach(this);
 		selfCheckoutStation.scanner.attach(this);
@@ -63,6 +70,13 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 	}
 
 	public void scanItem(PurchasableItem purchasableItem) throws SimulationException {
+		/**
+		 * The user scans an item using the scanner.
+		 * 
+		 * @param purchasableItem
+		 *              Item to be scanned.
+		 * @throws SimulationException
+		 */
 
 		itemBarcode = null;
 		while (itemBarcode == null) {
@@ -83,7 +97,12 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 	}
 
 	public void placeInBaggingArea(PurchasableItem purchasableItem) {
-		// scanItem(purchasableItem);
+		/**
+		 * The user places the item in the bagging area.
+		 * 
+		 * @param PurchasableItem
+		 *               Item to be placed.
+		 */
 		selfCheckoutStation.scale.add(purchasableItem.item);
 
 		// Case where scale is overloaded
@@ -146,6 +165,13 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 	}
 
 	public void addCoin(Coin coin) throws DisabledException {
+		/**
+		 * The user adds a coin 'coin'
+		 * 
+		 * @param Coin
+		 *               User adds a coin
+		 * @throws DisabledException
+		 */
 
 		CoinCheckerObserver checker = new CoinCheckerObserver();
 		selfCheckoutStation.coinValidator.attach(checker);
@@ -160,6 +186,13 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 	}
 
 	public void addBanknote(Banknote note) throws DisabledException {
+		/**
+		 * The user adds a coin 'coin'
+		 * 
+		 * @param Coin
+		 *               User adds a coin
+		 * @throws DisabledException
+		 */
 		BanknoteCheckerObserver checker = new BanknoteCheckerObserver();
 		selfCheckoutStation.banknoteValidator.attach(checker);
 		selfCheckoutStation.banknoteValidator.accept(note);
