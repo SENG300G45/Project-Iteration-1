@@ -32,8 +32,4 @@ public class PurchasableItem {
 		return this.product.getDescription();
 	}
 	
-	public void displayInfo() {
-		System.out.println("DESC.: " + this.getDescription());
-		System.out.println("PRICE: " + this.getPrice());
-	}
 }
