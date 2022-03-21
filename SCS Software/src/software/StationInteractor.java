@@ -6,12 +6,15 @@ import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.lsmr.selfcheckout.Banknote;
 import org.lsmr.selfcheckout.Barcode;
 import org.lsmr.selfcheckout.BarcodedItem;
+import org.lsmr.selfcheckout.Coin;
 import org.lsmr.selfcheckout.Item;
 import org.lsmr.selfcheckout.Numeral;
 import org.lsmr.selfcheckout.devices.AbstractDevice;
 import org.lsmr.selfcheckout.devices.BarcodeScanner;
+import org.lsmr.selfcheckout.devices.DisabledException;
 import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
@@ -19,8 +22,11 @@ import org.lsmr.selfcheckout.devices.observers.AbstractDeviceObserver;
 import org.lsmr.selfcheckout.devices.observers.BarcodeScannerObserver;
 import org.lsmr.selfcheckout.devices.observers.ElectronicScaleObserver;
 
+import observers.BanknoteCheckerObserver;
+import observers.CoinCheckerObserver;
+
 public class StationInteractor implements ElectronicScaleObserver, BarcodeScannerObserver {
-	// private ArrayList<Item> items = new ArrayList<>();
+
 	private static final int MAX_OBJECTS = 50;
 	private SelfCheckoutStation selfCheckoutStation;
 	private PurchasableItem[] placedItems = new PurchasableItem[MAX_OBJECTS];
@@ -36,22 +42,13 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 	public double itemWeight;
 	private PurchasableItem[] scannedItems = new PurchasableItem[MAX_OBJECTS];
 	private int numberOfScannedItems;
+	private BigDecimal paidAmountWithCoins;
+	private float paidAmountWithBanknote;
 
 	public StationInteractor(SelfCheckoutStation scs) {
 		selfCheckoutStation = scs;
 		selfCheckoutStation.scale.attach(this);
 		selfCheckoutStation.scanner.attach(this);
-
-		// //List of Purchasableitems in catalog
-		// Numeral numeral[] = {Numeral.one, Numeral.two};
-		// Barcode b = new Barcode(numeral);
-		// BarcodedItem redAppleBarcodedItem = new BarcodedItem(b, 10.0);
-		// BigDecimal redApplePrice = new BigDecimal("1.50");
-		// //PurchasableItem redApple = new PurchasableItem(redAppleBarcodedItem,
-		// redApplePrice, "red apple");
-		//
-		// //itemCatalog.add(redApple);
-		// map.put(b, redAppleBarcodedItem);
 	}
 
 	public void addToCatalog(BarcodedItem item) {
@@ -123,7 +120,7 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 		if (isPayingWithCoins) {
 
 			while (paidAmountWithCoins.compareTo(totalBill) < 0) {
-				Coin dollar = new Coin(scs.coinDenominations.get(3));
+				Coin dollar = new Coin(selfCheckoutStation.coinDenominations.get(3));
 
 				try {
 					addCoin(dollar);
@@ -134,7 +131,7 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 		} else {
 
 			while ((float) paidAmountWithBanknote < totalBill.floatValue()) {
-				Banknote fiveDollarBill = new Banknote(Currency.getInstance("CAD"), scs.banknoteDenominations[0]);
+				Banknote fiveDollarBill = new Banknote(Currency.getInstance("CAD"), selfCheckoutStation.banknoteDenominations[0]);
 				try {
 					addBanknote(fiveDollarBill);
 				} catch (DisabledException e) {
@@ -149,8 +146,8 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 	private void addCoin(Coin coin) throws DisabledException {
 
 		CoinCheckerObserver checker = new CoinCheckerObserver();
-		scs.coinValidator.attach(checker);
-		scs.coinValidator.accept(coin);
+		selfCheckoutStation.coinValidator.attach(checker);
+		selfCheckoutStation.coinValidator.accept(coin);
 		if (checker.checkValid()) {
 			paidAmountWithCoins.add(checker.getValue());
 		}
@@ -159,8 +156,8 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 
 	private void addBanknote(Banknote note) throws DisabledException {
 		BanknoteCheckerObserver checker = new BanknoteCheckerObserver();
-		scs.banknoteValidator.attach(checker);
-		scs.banknoteValidator.accept(note);
+		selfCheckoutStation.banknoteValidator.attach(checker);
+		selfCheckoutStation.banknoteValidator.accept(note);
 		if (checker.checkValid()) {
 			paidAmountWithBanknote += checker.getValue();
 		}
