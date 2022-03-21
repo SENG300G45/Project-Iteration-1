@@ -1,16 +1,19 @@
 package observers;
 
+import org.lsmr.selfcheckout.devices.observers.AbstractDeviceObserver;
+import org.lsmr.selfcheckout.devices.observers.ElectronicScaleObserver;
+
 import software.StationInteractor;
 
 /**
  * Observes events emanating from the station interactor.
  */
-public class StationInteractorObserver {
+public interface StationInteractorObserver extends ElectronicScaleObserver {
 	
-	public StationInteractorObserver() {}
+	//public StationInteractorObserver() {}
 	
-	public void scaleOverloaded(StationInteractor station) {}
+	void scaleOverloaded(StationInteractor station);
 	
-	public void notifyAttendant(StationInteractor station) {}
+	void notifyAttendant(StationInteractor station);
 	
 }

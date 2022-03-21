@@ -1,99 +1,123 @@
 package software;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Currency;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.lsmr.selfcheckout.Banknote;
-import org.lsmr.selfcheckout.Coin;
-import org.lsmr.selfcheckout.devices.DisabledException;
+import org.lsmr.selfcheckout.Barcode;
+import org.lsmr.selfcheckout.BarcodedItem;
+import org.lsmr.selfcheckout.Item;
+import org.lsmr.selfcheckout.Numeral;
+import org.lsmr.selfcheckout.devices.AbstractDevice;
+import org.lsmr.selfcheckout.devices.BarcodeScanner;
+import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.SimulationException;
+import org.lsmr.selfcheckout.devices.observers.AbstractDeviceObserver;
+import org.lsmr.selfcheckout.devices.observers.BarcodeScannerObserver;
+import org.lsmr.selfcheckout.devices.observers.ElectronicScaleObserver;
 
-import observers.ScanCheckerObserver;
-
-import observers.ScaleCheckObserver;
-import observers.StationInteractorObserver;
-import org.lsmr.selfcheckout.devices.observers.CoinValidatorObserver;
-
-import observers.BanknoteCheckerObserver;
-import observers.CoinCheckerObserver;
-
-public class StationInteractor {
+public class StationInteractor implements ElectronicScaleObserver, BarcodeScannerObserver {
+	// private ArrayList<Item> items = new ArrayList<>();
 	private static final int MAX_OBJECTS = 50;
-	private SelfCheckoutStation scs;
+	private SelfCheckoutStation selfCheckoutStation;
 	private PurchasableItem[] placedItems = new PurchasableItem[MAX_OBJECTS];
-	private PurchasableItem[] scannedItems = new PurchasableItem[MAX_OBJECTS];
-	private int numberOfPlacedItems;
-	private int numberOfScannedItems;
+	public PurchasableItem[] itemCatalog = new PurchasableItem[10];
 	private BigDecimal totalBill = BigDecimal.valueOf(0);
-	private BigDecimal paidAmountWithCoins = BigDecimal.ZERO;
-	private int paidAmountWithBanknote = 0;
+	private int numberOfPlacedItems;
+	public double currentWeightOnScale;
+	public boolean isOverloaded = false;
+	public boolean itemWeightCorrect;
+	public Map<Barcode, BarcodedItem> map = new HashMap<Barcode, BarcodedItem>();
+	public BarcodedItem matchingBarcodedItem = null;
+	public Barcode itemBarcode;
+	public double itemWeight;
+	private PurchasableItem[] scannedItems = new PurchasableItem[MAX_OBJECTS];
+	private int numberOfScannedItems;
 
-	private StationInteractorObserver stationObserver;
+	public StationInteractor(SelfCheckoutStation scs) {
+		selfCheckoutStation = scs;
+		selfCheckoutStation.scale.attach(this);
+		selfCheckoutStation.scanner.attach(this);
 
-	public StationInteractor(int maxWeight, int sensitivity) {
-		int noteDenomination[] = { 5, 10, 20, 50, 100 };
-		BigDecimal coinDenomination[] = { new BigDecimal(0.05), new BigDecimal(0.10), new BigDecimal(0.25),
-				new BigDecimal(1), new BigDecimal(2) };
-
-		scs = new SelfCheckoutStation(Currency.getInstance("CAD"), noteDenomination, coinDenomination, maxWeight,
-				sensitivity);
-		stationObserver = new StationInteractorObserver();
-		numberOfPlacedItems = 0;
+		// //List of Purchasableitems in catalog
+		// Numeral numeral[] = {Numeral.one, Numeral.two};
+		// Barcode b = new Barcode(numeral);
+		// BarcodedItem redAppleBarcodedItem = new BarcodedItem(b, 10.0);
+		// BigDecimal redApplePrice = new BigDecimal("1.50");
+		// //PurchasableItem redApple = new PurchasableItem(redAppleBarcodedItem,
+		// redApplePrice, "red apple");
+		//
+		// //itemCatalog.add(redApple);
+		// map.put(b, redAppleBarcodedItem);
 	}
 
-	/**
-	 * The user places the item on the electronic scale.
-	 * 
-	 * @param PurchasableItem
-	 *                        The item to scan.
-	 */
-	public void placeItem(PurchasableItem purchasableItem) {
-		ScaleCheckObserver observer = new ScaleCheckObserver();
-		scs.scale.attach(observer);
+	public void addToCatalog(BarcodedItem item) {
+		map.put(item.getBarcode(), item);
+	}
 
-		// TODO Add a loop that checks if the item has been scanned
-		if (!observer.checkFull()) {
-			scs.scale.add(purchasableItem.item);
-			placedItems[numberOfPlacedItems] = purchasableItem;
-			numberOfPlacedItems++;
+	public void scanItem(PurchasableItem purchasableItem) throws SimulationException {
 
-			// Adds the price of the item to the total bill
-			totalBill = totalBill.add(purchasableItem.getPrice());
+		itemBarcode = null;
+		while (itemBarcode == null) {
+			selfCheckoutStation.scanner.scan(purchasableItem.item);
+		}
+
+		matchingBarcodedItem = null;
+		matchingBarcodedItem = map.get(itemBarcode);
+
+		if (matchingBarcodedItem != null) {
+			itemWeight = matchingBarcodedItem.getWeight();
+			scannedItems[numberOfScannedItems] = purchasableItem;
+			numberOfScannedItems++;
 		} else {
-			notifyScaleFull();
+			throw new SimulationException("Item not in the catalog");
 		}
 
 	}
 
-	/**
-	 * The user scans an item.
-	 * 
-	 * @param PurchasabeItem
-	 *                       The item to scan.
-	 */
-	public void scanItem(PurchasableItem purchasableItem) {
-		ScanCheckerObserver observer = new ScanCheckerObserver();
-		scs.scanner.attach(observer);
-		while (observer.getBarcode() == null) {
-			scs.scanner.scan(purchasableItem.item);
+	public void placeInBaggingArea(PurchasableItem purchasableItem) {
+		// scanItem(purchasableItem);
+		selfCheckoutStation.scale.add(purchasableItem.item);
+
+		// Case where scale is overloaded
+		if (isOverloaded == true) {
+			// error
+			itemWeightCorrect = false;
 		}
 
-		scannedItems[numberOfScannedItems] = purchasableItem;
-		numberOfScannedItems++;
+		else {
+			// Case where placed item does match item's listed weight
+			if (currentWeightOnScale == itemWeight) {
+
+				itemWeightCorrect = true;
+
+				placedItems[numberOfPlacedItems] = purchasableItem;
+				numberOfPlacedItems++;
+				totalBill = totalBill.add(purchasableItem.getPrice());
+
+			}
+
+			// Case where placed item does not match item's listed weight
+			if (currentWeightOnScale != itemWeight) {
+				itemWeightCorrect = false;
+			}
+		}
+
 	}
 
-	private void notifyScaleFull() {
-		stationObserver.scaleOverloaded(this);
+	@Override
+	public void enabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
 	}
-	
 
 	/**
 	 * The user wishes to checkout
 	 * 
 	 * @param isPayingWithCoins
-	 *                        True if the user wants to pay with coins, and False
-	 *                        when the user wants to pay with banknotes.
+	 *                          True if the user wants to pay with coins, and False
+	 *                          when the user wants to pay with banknotes.
 	 */
 	public void checkout(boolean isPayingWithCoins) {
 		if (isPayingWithCoins) {
@@ -141,6 +165,31 @@ public class StationInteractor {
 			paidAmountWithBanknote += checker.getValue();
 		}
 
+	}
+
+	@Override
+	public void disabled(AbstractDevice<? extends AbstractDeviceObserver> device) {
+	}
+
+	@Override
+	public void weightChanged(ElectronicScale scale, double weightInGrams) {
+		isOverloaded = false;
+		currentWeightOnScale = weightInGrams;
+	}
+
+	@Override
+	public void overload(ElectronicScale scale) {
+		isOverloaded = true;
+	}
+
+	@Override
+	public void outOfOverload(ElectronicScale scale) {
+		// isOverloaded = false;
+	}
+
+	@Override
+	public void barcodeScanned(BarcodeScanner barcodeScanner, Barcode barcode) {
+		itemBarcode = barcode;
 	}
 
 }
