@@ -31,6 +31,8 @@ public class placeItemTest {
 	private ElectronicScale scale;
 	private PurchasableItem bigApple;
 	private PurchasableItem normalApple;
+	private PurchasableItem notApple;
+	private PurchasableItem testApple;
 	private int found;
 
 	
@@ -45,10 +47,19 @@ public class placeItemTest {
 		//interactor = new StationInteractor(10, 10);
 		Numeral numeral[] = {Numeral.one, Numeral.two};
 		Barcode b = new Barcode(numeral);
+		BarcodedItem testAppleBarcodedItem = new BarcodedItem(b, 10.0);
+		BigDecimal testApplePrice = new BigDecimal("1.50");
+		testApple = new PurchasableItem(testAppleBarcodedItem,testApplePrice, "red apple");
+		
 		BarcodedItem heavyItem = new BarcodedItem(b,110.0);
 		BarcodedItem acceptableItem = new BarcodedItem(b,10.0);
+		BarcodedItem unusualItem = new BarcodedItem(b, 11.0);
+		
 		bigApple = new PurchasableItemStub(heavyItem, BigDecimal.ONE, "apple");
 		normalApple = new PurchasableItemStub(acceptableItem, BigDecimal.ONE, "apple");
+		//notApple = new PurchasableItemStub(unusualItem, BigDecimal.ONE, "not an apple");
+		
+		notApple = new PurchasableItem(unusualItem, BigDecimal.ONE, "not an apple");
 		
 		int maxWeight = 100;
 		int sensitivity = 5;
@@ -58,6 +69,12 @@ public class placeItemTest {
 		si = new StationInteractor(scs);
 	}
 	
+	
+	@Test
+	public void testItemNotNull() {
+		si.scanItem(testApple);
+		assertEquals(testApple.getWeight(), si.itemWeight, 0);
+	}
 	
 	//Test if adding a heavy item overloads the scale
 	@Test
@@ -69,19 +86,24 @@ public class placeItemTest {
 	//Test if weighed item does match item's listed weight in database
 @Test
 	public void testItemWeightMatches() {
-		si.placeInBaggingArea(normalApple);
+		si.scanItem(testApple);
+		si.placeInBaggingArea(testApple);
+		
+		
+		System.out.println("walrus");
+		System.out.println(testApple.getCode());
+		System.out.println(si.matchingBarcodedItem);
+		System.out.println(si.itemWeight);
+		System.out.println(si.currentWeightOnScale);
+		System.out.println("seal");
+		//assertEquals(si.itemWeightCorrect, si.currentWeightOnScale);
 		assertTrue(si.itemWeightCorrect);
-		//assertEquals(true, si.itemWeightCorrect);
 	}
 	
 	//Test if weighed item does not match item's listed weight in database
 	@Test
 	public void testItemWeightNoMatch() {
-		si.placeInBaggingArea(normalApple);
-		si.currentWeightOnScale = 11.0;
-		System.out.print(si.currentWeightOnScale == normalApple.getWeight());
-		System.out.print(si.itemWeightCorrect);
-		//System.out.print(si.isOverloaded);
+		si.placeInBaggingArea(notApple);
 		assertFalse(si.itemWeightCorrect);
 	}
 	
