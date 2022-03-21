@@ -132,7 +132,7 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 
 	@Override
 	public void outOfOverload(ElectronicScale scale) {
-		isOverloaded = false;
+//		isOverloaded = false;
 	}
 	
 	@Override
