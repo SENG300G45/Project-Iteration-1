@@ -24,8 +24,9 @@ import org.lsmr.selfcheckout.devices.observers.ElectronicScaleObserver;
 
 import observers.BanknoteCheckerObserver;
 import observers.CoinCheckerObserver;
+import observers.StationInteractorObserver;
 
-public class StationInteractor implements ElectronicScaleObserver, BarcodeScannerObserver {
+public class StationInteractor implements ElectronicScaleObserver, BarcodeScannerObserver, StationInteractorObserver {
 
 	private static final int MAX_OBJECTS = 50;
 	private SelfCheckoutStation selfCheckoutStation;
@@ -33,22 +34,28 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 	public PurchasableItem[] itemCatalog = new PurchasableItem[10];
 	private BigDecimal totalBill = BigDecimal.valueOf(0);
 	private int numberOfPlacedItems;
-	public double currentWeightOnScale;
+	private double currentWeightOnScale;
 	public boolean isOverloaded = false;
 	public boolean itemWeightCorrect;
-	public Map<Barcode, BarcodedItem> map = new HashMap<Barcode, BarcodedItem>();
-	public BarcodedItem matchingBarcodedItem = null;
+	private Map<Barcode, BarcodedItem> map = new HashMap<Barcode, BarcodedItem>();
+	private BarcodedItem matchingBarcodedItem = null;
 	public Barcode itemBarcode;
 	public double itemWeight;
 	private PurchasableItem[] scannedItems = new PurchasableItem[MAX_OBJECTS];
 	private int numberOfScannedItems;
-	private BigDecimal paidAmountWithCoins;
-	private float paidAmountWithBanknote;
+	public BigDecimal paidAmountWithCoins;
+	public float paidAmountWithBanknote;
+	public boolean attendantCalled;
 
 	public StationInteractor(SelfCheckoutStation scs) {
 		selfCheckoutStation = scs;
 		selfCheckoutStation.scale.attach(this);
 		selfCheckoutStation.scanner.attach(this);
+		
+		paidAmountWithCoins = BigDecimal.ZERO;
+		paidAmountWithBanknote = 0;
+		
+		attendantCalled = false;
 	}
 
 	public void addToCatalog(BarcodedItem item) {
@@ -83,6 +90,7 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 		if (isOverloaded == true) {
 			// error
 			itemWeightCorrect = false;
+			notifyAttendant(this);
 		}
 
 		else {
@@ -115,51 +123,51 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 	 * @param isPayingWithCoins
 	 *                          True if the user wants to pay with coins, and False
 	 *                          when the user wants to pay with banknotes.
+	 * @throws DisabledException 
 	 */
-	public void checkout(boolean isPayingWithCoins) {
+	public void checkout(boolean isPayingWithCoins) throws DisabledException {
 		if (isPayingWithCoins) {
-
+			
 			while (paidAmountWithCoins.compareTo(totalBill) < 0) {
-				Coin dollar = new Coin(selfCheckoutStation.coinDenominations.get(3));
-
-				try {
-					addCoin(dollar);
-				} catch (DisabledException e) {
-					e.printStackTrace();
-				}
+				
+				BigDecimal coinValue = selfCheckoutStation.coinDenominations.get(3);
+				Coin dollar = new Coin(Currency.getInstance("CAD"),coinValue);
+				addCoin(dollar);
 			}
 		} else {
 
 			while ((float) paidAmountWithBanknote < totalBill.floatValue()) {
 				Banknote fiveDollarBill = new Banknote(Currency.getInstance("CAD"), selfCheckoutStation.banknoteDenominations[0]);
-				try {
-					addBanknote(fiveDollarBill);
-				} catch (DisabledException e) {
-					e.printStackTrace();
-				}
+				addBanknote(fiveDollarBill);
 			}
 
 		}
 
 	}
 
-	private void addCoin(Coin coin) throws DisabledException {
+	public void addCoin(Coin coin) throws DisabledException {
 
 		CoinCheckerObserver checker = new CoinCheckerObserver();
 		selfCheckoutStation.coinValidator.attach(checker);
 		selfCheckoutStation.coinValidator.accept(coin);
 		if (checker.checkValid()) {
-			paidAmountWithCoins.add(checker.getValue());
+			paidAmountWithCoins = paidAmountWithCoins.add(checker.getValue());
+		}
+		else {
+			notifyAttendant(this);
 		}
 
 	}
 
-	private void addBanknote(Banknote note) throws DisabledException {
+	public void addBanknote(Banknote note) throws DisabledException {
 		BanknoteCheckerObserver checker = new BanknoteCheckerObserver();
 		selfCheckoutStation.banknoteValidator.attach(checker);
 		selfCheckoutStation.banknoteValidator.accept(note);
 		if (checker.checkValid()) {
 			paidAmountWithBanknote += checker.getValue();
+		}
+		else {
+			notifyAttendant(this);
 		}
 
 	}
@@ -187,6 +195,11 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 	@Override
 	public void barcodeScanned(BarcodeScanner barcodeScanner, Barcode barcode) {
 		itemBarcode = barcode;
+	}
+
+	@Override
+	public void notifyAttendant(StationInteractor station) {
+		attendantCalled = true;
 	}
 
 }
