@@ -66,6 +66,9 @@ public class placeItemTest {
 		BigDecimal coinDenomination[] = {new BigDecimal(0.05), new BigDecimal(0.10), new BigDecimal(0.25), new BigDecimal(1), new BigDecimal(2)};
 		scs = new SelfCheckoutStation(Currency.getInstance("CAD"), noteDenomination, coinDenomination, maxWeight, sensitivity);
 		si = new StationInteractor(scs);
+		
+		si.addToCatalog(heavyItem);
+		si.addToCatalog(acceptableItem);
 	}
 	
 	
@@ -88,13 +91,6 @@ public class placeItemTest {
 		si.scanItem(testApple);
 		si.placeInBaggingArea(testApple);
 		
-		
-		System.out.println("walrus");
-		System.out.println(testApple.getCode());
-		System.out.println(si.matchingBarcodedItem);
-		System.out.println(si.itemWeight);
-		System.out.println(si.currentWeightOnScale);
-		System.out.println("seal");
 		//assertEquals(si.itemWeightCorrect, si.currentWeightOnScale);
 		assertTrue(si.itemWeightCorrect);
 	}
