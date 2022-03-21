@@ -20,7 +20,6 @@ import org.lsmr.selfcheckout.devices.OverloadException;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
 import org.lsmr.selfcheckout.devices.observers.AbstractDeviceObserver;
 
-import observers.ScaleCheckObserver;
 import observers.StationInteractorObserver;
 import software.PurchasableItem;
 import software.StationInteractor;

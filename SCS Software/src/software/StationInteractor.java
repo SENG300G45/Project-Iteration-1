@@ -14,6 +14,7 @@ import org.lsmr.selfcheckout.devices.AbstractDevice;
 import org.lsmr.selfcheckout.devices.BarcodeScanner;
 import org.lsmr.selfcheckout.devices.ElectronicScale;
 import org.lsmr.selfcheckout.devices.SelfCheckoutStation;
+import org.lsmr.selfcheckout.devices.SimulationException;
 import org.lsmr.selfcheckout.devices.observers.AbstractDeviceObserver;
 import org.lsmr.selfcheckout.devices.observers.BarcodeScannerObserver;
 import org.lsmr.selfcheckout.devices.observers.ElectronicScaleObserver;
@@ -43,26 +44,38 @@ public class StationInteractor implements ElectronicScaleObserver, BarcodeScanne
 		selfCheckoutStation.scale.attach(this);
 		selfCheckoutStation.scanner.attach(this);
 
-		//List of Purchasableitems in catalog
-		Numeral numeral[] = {Numeral.one, Numeral.two};
-		Barcode b = new Barcode(numeral);
-		BarcodedItem redAppleBarcodedItem = new BarcodedItem(b, 10.0);
-		BigDecimal redApplePrice = new BigDecimal("1.50");
-		//PurchasableItem redApple = new PurchasableItem(redAppleBarcodedItem, redApplePrice, "red apple");
-		
-		//itemCatalog.add(redApple);
-		map.put(b, redAppleBarcodedItem);
+//		//List of Purchasableitems in catalog
+//		Numeral numeral[] = {Numeral.one, Numeral.two};
+//		Barcode b = new Barcode(numeral);
+//		BarcodedItem redAppleBarcodedItem = new BarcodedItem(b, 10.0);
+//		BigDecimal redApplePrice = new BigDecimal("1.50");
+//		//PurchasableItem redApple = new PurchasableItem(redAppleBarcodedItem, redApplePrice, "red apple");
+//		
+//		//itemCatalog.add(redApple);
+//		map.put(b, redAppleBarcodedItem);
 	}
 	
-	public void scanItem(PurchasableItem purchasableItem) {
-		selfCheckoutStation.scanner.scan(purchasableItem.item);
+	public void addToCatalog(BarcodedItem item) {
+		map.put(item.getBarcode(), item);
+	}
+	
+	public void scanItem(PurchasableItem purchasableItem) throws SimulationException {
 		
+		itemBarcode = null;
+		while(itemBarcode == null) {
+			selfCheckoutStation.scanner.scan(purchasableItem.item);
+		}
+
+		matchingBarcodedItem = null;
 		matchingBarcodedItem = map.get(itemBarcode);
 		
 		if (matchingBarcodedItem != null) {
 			itemWeight = matchingBarcodedItem.getWeight();
 			scannedItems[numberOfScannedItems] = purchasableItem;
 			numberOfScannedItems++;
+		}
+		else {
+			throw new SimulationException("Item not in the catalog");
 		}
 	
 	}

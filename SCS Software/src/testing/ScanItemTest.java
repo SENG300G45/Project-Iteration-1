@@ -21,7 +21,8 @@ public class ScanItemTest {
 	private SelfCheckoutStation scs;
 	private StationInteractor si;
 	PurchasableItem testApple; 
-	PurchasableItem testApple2; 
+	PurchasableItem outOfCatalogApple;
+	PurchasableItem heavyApple;
 
 	@Before
 	public void setup() {
@@ -40,16 +41,16 @@ public class ScanItemTest {
 		
 		Numeral numeral2[] = {Numeral.three, Numeral.two};
 		Barcode b2 = new Barcode(numeral2);
-		BarcodedItem testAppleBarcodedItem2 = new BarcodedItem(b2, 10.0);
+		BarcodedItem testAppleBarcodedItem2 = new BarcodedItem(b2, 20.0);
 		BigDecimal testApplePrice2 = new BigDecimal("1.50");
-		testApple2 = new PurchasableItem(testAppleBarcodedItem2,testApplePrice2, "red apple");
-	
+		outOfCatalogApple = new PurchasableItem(testAppleBarcodedItem2,testApplePrice2, "red apple");
+			
+		si.addToCatalog(testApple.item);
 	}
-	@Test
-	public void testItemCodeNull() {
-		si.scanItem(testApple2);
-		System.out.print(testApple.getCode());
-		assertNull(si.matchingBarcodedItem);
+	
+	@Test(expected = SimulationException.class)
+	public void testItemNotInCatalog() {
+		si.scanItem(outOfCatalogApple);
 	}
 	
 	@Test
